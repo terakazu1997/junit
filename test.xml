@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+ xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+ xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+ <!-- 自動Injection（ActionパスBeanは対象外） -->
+ <context:annotation-config/>
+
+ <!-- アプリケーション全体のBean定義 -->
+ <!-- データソース定義 -->
+ <bean id="IPSEPDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+   <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+   <property name="url" value="jdbc:mysql://localhost:3306/test_mysql_database"/>
+   <property name="username" value="root"/>
+   <property name="password" value="admin"/>
+ </bean>
+
+
+
+ <aop:config>
+   <aop:pointcut id="blogicBeans" expression="execution(* jp.co.*.blogic.*.execute(..))" />
+   <aop:pointcut id="daoBeans" expression="bean(queryDAO) || bean(updateDAO) || bean(spDAO) || bean(queryRowHandleDAO)" />
+   <aop:pointcut id="newTxService" expression="bean(newTxCommonService)" />
+ </aop:config>
+
+
+
+ <!-- ======================================== iBATIS定義 -->
+ <!-- SqlMap定義 -->
+ <bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+   <property name="configLocation" value="file:webapps/WEB-INF/sqlMapConfig.xml" />
+   <!--  <property name="mappingLocations" value="classpath:/jp/co/iasep/**/dao/*SqlMap.xml" /> -->
+   <property name="dataSource" ref="IPSEPDataSource" />
+ </bean>
+
+ <!-- 照会系のDAO定義 -->
+ <bean id="queryDAO" class="jp.terasoluna.fw.dao.ibatis.QueryDAOiBatisImpl">
+   <property name="sqlMapClient" ref="sqlMapClient" />
+ </bean>
+
+ <!-- 更新系のDAO定義 -->
+ <bean id="updateDAO" class="jp.terasoluna.fw.dao.ibatis.UpdateDAOiBatisImpl">
+   <property name="sqlMapClient" ref="sqlMapClient" />
+ </bean>
+
+ <!-- ストアドプロシジャ用のDAO定義 -->
+ <bean id="spDAO" class="jp.terasoluna.fw.dao.ibatis.StoredProcedureDAOiBatisImpl">
+   <property name="sqlMapClient" ref="sqlMapClient" />
+ </bean>
+
+ <!-- ローハンドラ用のDAO定義 -->
+ <bean id="queryRowHandleDAO" class="jp.terasoluna.fw.dao.ibatis.QueryRowHandleDAOiBatisImpl">
+   <property name="sqlMapClient" ref="sqlMapClient" />
+ </bean>
+
+
+ <!-- 外貨資格更新テスト初期表示処理BLogic -->
+ <bean id="testInitBLogic" class="jp.terasoluna.thin.tutorial.web.test.blogic.CIALFMTestInitBLogic" >
+ </bean>
+ <!-- 外貨資格更新トップ初期表示処理BLogic -->
+ <bean id="topInitBLogic" class="jp.terasoluna.thin.tutorial.web.test.blogic.CIALFMTopInitBLogic" >
+ </bean>
+ <!-- 外貨資格更新テスト回答送信BLogic -->
+ <bean id="testSendAnswerBLogic" class="jp.terasoluna.thin.tutorial.web.test.blogic.CIALFMTestSendAnswerBLogic" >
+ </bean>
+
+</beans>
