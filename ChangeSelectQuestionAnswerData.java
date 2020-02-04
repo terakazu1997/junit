@@ -73,11 +73,11 @@ public class ChangeSelectQuestionAnswerData extends BaseDatabase {
         initConnectionDB();
         try {
             ps = conn.prepareStatement(
-                "DELETE FROM FMUQ WHERE CATEGORY = '2'"
+                "DELETE FROM FMUQ WHERE CATEGORY = '2' OR CATEGORY = '9'"
             );
             ps.executeUpdate();
             ps = conn.prepareStatement(
-                "DELETE FROM FMUA WHERE CHOICE_NO = '5' OR CATEGORY = '2'"
+                "DELETE FROM FMUA WHERE CHOICE_NO = '5' OR CATEGORY = '2' OR CATEGORY = '9'"
             );
             ps.executeUpdate();
             ps = conn.prepareStatement(
@@ -96,30 +96,18 @@ public class ChangeSelectQuestionAnswerData extends BaseDatabase {
             e.printStackTrace();
         }
     }
-
-    public void updateMakeTestQuestion(int questionCnt,int[] choicePassStatus, String deleteProcess) {
+    public void updateMakeTestQuestion(int questionCnt,int[] choicePassStatus) {
         // (3) SQL送信用インスタンスの作成
         initConnectionDB();
         try {
-            if(deleteProcess.equals("patternX")){
-                ps = conn.prepareStatement(
-                    "UPDATE FMUQ SET PATTERN_NO = 'X'"
-                );
-                ps.executeUpdate();
-                ps = conn.prepareStatement(
-                    "UPDATE FMUA SET PATTERN_NO = 'X'"
-                );
-                ps.executeUpdate();
-            } else if(deleteProcess.equals("deleteFlg")) {
-                ps = conn.prepareStatement(
-                    "UPDATE FMUQ SET DELETE_FLG = '1'"
-                );
-                ps.executeUpdate();
-                ps = conn.prepareStatement(
-                    "UPDATE FMUA SET DELETE_FLG = '1'"
-                );
-                ps.executeUpdate();
-            }
+            ps = conn.prepareStatement(
+                "UPDATE FMUQ SET PATTERN_NO = 'X'"
+            );
+            ps.executeUpdate();
+            ps = conn.prepareStatement(
+                "UPDATE FMUA SET PATTERN_NO = 'X'"
+            );
+            ps.executeUpdate();
             for(int i =1; i<= questionCnt; i++) {
                 ps = conn.prepareStatement(
                      "insert into FMUQ VALUES('A','2',?,?,?,'')"
@@ -158,6 +146,74 @@ public class ChangeSelectQuestionAnswerData extends BaseDatabase {
             // TODO 自動生成された catch ブロック
             e.printStackTrace();
         }
+    }
+    public void updateMakeTestQuestion(int questionCnt,int choiceCnt,int questionPatternJudgFlg,int choicePatternJudgFlg,String choiceCategory, String questionDeleteFlg, String choiceDeleteFlg) {
+        // (3) SQL送信用インスタンスの作成
+        initConnectionDB();
+        try {
+            ps = conn.prepareStatement("UPDATE FMUQ SET PATTERN_NO = 'X'");
+            ps.executeUpdate();
+            ps = conn.prepareStatement("UPDATE FMUA SET PATTERN_NO = 'X'");
+            ps.executeUpdate();
+            for(int i =1; i<= questionCnt; i++) {
+                ps = conn.prepareStatement(
+                     "insert into FMUQ VALUES(?,2,?,?,?,?)"
+                );
+                switch(questionPatternJudgFlg) {
+                    case 1:
+                        ps.setString(1, "A");
+                        break;
+                    case 3:
+                        if(i <= 10) {
+                            ps.setString(1, "A");
+                        } else {
+                            ps.setString(1, "B");
+                        }
+                        break;
+                }
+                ps.setInt(2, i);
+                ps.setString(3, String.format("%d問目の問題", i));
+                ps.setString(4, String.format("%d問目の問題の解説", i));
+                ps.setString(5, questionDeleteFlg);
+                ps.executeUpdate();
+                for(int j=1; j<=choiceCnt; j++) {
+                    ps = conn.prepareStatement(
+                        "INSERT INTO FMUA VALUES (?,?,?,?,?,?,?);"
+                    );
+                    switch(questionPatternJudgFlg) {
+                    case 1:
+                        ps.setString(1, "A");
+                        break;
+                    case 2:
+                        ps.setString(1, "B");
+                        break;
+                    case 3:
+                        if(i <= 10) {
+                            ps.setString(1, "A");
+                        } else {
+                            ps.setString(1, "B");
+                        }
+                        break;
+                    }
+                    ps.setString(2, choiceCategory);
+                    ps.setInt(3, i);
+                    ps.setInt(4, j);
+                    ps.setString(5, String.format("%d問目の%dつ目の選択肢", i,j));
+                    if(j <= 2) {
+                        ps.setInt(6, 1);
+                    }else {
+                        ps.setInt(6, 0);
+                    }
+                    ps.setString(7, choiceDeleteFlg);
+                    ps.executeUpdate();
+                }
+            }
+            selectFMQuestionInfo();
+            ps.close();
+         } catch (SQLException e) {
+             // TODO 自動生成された catch ブロック
+             e.printStackTrace();
+         }
     }
     public void updateQuestionRandom9() {
         // (3) SQL送信用インスタンスの作成
