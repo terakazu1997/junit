@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.text.ParseException;
 import java.util.Calendar;
 
 import org.junit.BeforeClass;
@@ -57,8 +56,8 @@ public class CIALFMTopInitBLogicTest2 extends BaseJunitTestVariable{
         pw.println("●結果");
         try {
             pw.println(topInitBLogic.execute());
-        } catch (ParseException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            pw.println(e);
         }
         pw.println(String.format("外貨資格更新トップ初期表示BLogic動作確認2_No%d終了",testNo));
         pw.println(String.format("外貨資格更新トップ初期表示BLogic動作確認2_No%dデータ戻し開始",testNo));

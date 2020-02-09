@@ -1,3 +1,4 @@
+
 package junitTest;
 
 import java.io.BufferedWriter;
@@ -7,11 +8,16 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Calendar;
+import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jp.terasoluna.thin.tutorial.web.test.bean.CIAFMUpdateAttendanceOutput;
 import jp.terasoluna.thin.tutorial.web.test.blogic.CIALFMTestInitBLogic;
 
 public class CIALFMTestInitBLogicTest2 extends BaseJunitTestVariable{
@@ -57,7 +63,24 @@ public class CIALFMTestInitBLogicTest2 extends BaseJunitTestVariable{
         pw.println("●結果");
         for(int i =1; i<=randomCnt; i++) {
             String result = testInitBLogic.execute();
-            pw.println(result);
+            ObjectMapper mapper = new ObjectMapper();
+            List<CIAFMUpdateAttendanceOutput> outputList;
+            try {
+                outputList = mapper.readValue(result, new TypeReference<List<CIAFMUpdateAttendanceOutput>>(){});
+                int j = 1;
+                pw.println(String.format("%d回目のランダム",i ));
+                for(CIAFMUpdateAttendanceOutput output : outputList) {
+                    pw.println(String.format("%d問目の出力問題リスト", j));
+                    pw.println(String.format(
+                            "問題ID:%s,問題文:%s,解説:%s,選択肢リスト:%s,正答リスト:%s",
+                            output.getQuestionId(),output.getQuestionSentence(),output.getQuestionExplanation(),output.getChoiceList(),output.getPassList()
+                    ));
+                    j++;
+                }
+            } catch (IOException e) {
+                // TODO 自動生成された catch ブロック
+                e.printStackTrace();
+            }
         }
         pw.println(String.format("外貨資格更新テスト初期表示BLogic動作確認2_No%d終了",testNo));
         pw.println(String.format("外貨資格更新テスト初期表示BLogic動作確認2_No%dデータ戻し開始",testNo));

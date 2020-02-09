@@ -58,7 +58,11 @@ public class CIALFMTestSendAnswerBLogicTest1 extends BaseJunitTestVariable{
         pw.println(String.format("外貨資格更新テスト回答送信BLogic動作確認1_No%dデータ準備終了",testNo));
         pw.println(String.format("外貨資格更新テスト回答送信BLogic動作確認1_No%d開始",testNo));
         pw.println("●結果");
-        pw.println(testSendAnswerBLogic.execute(paramP));
+        try {
+            pw.println(testSendAnswerBLogic.execute(paramP));
+        } catch(Exception e) {
+            pw.println(e);
+        }
         userData.selectFMUserInfo();
         foreignHistoryData.selectForeignHistoryInfo();
         pw.println(String.format("外貨資格更新テスト回答送信BLogic動作確認1_No%d終了",testNo));

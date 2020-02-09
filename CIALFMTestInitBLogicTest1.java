@@ -7,11 +7,16 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Calendar;
+import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jp.terasoluna.thin.tutorial.web.test.bean.CIAFMUpdateAttendanceOutput;
 import jp.terasoluna.thin.tutorial.web.test.blogic.CIALFMTestInitBLogic;
 
 public class CIALFMTestInitBLogicTest1 extends BaseJunitTestVariable{
@@ -58,13 +63,31 @@ public class CIALFMTestInitBLogicTest1 extends BaseJunitTestVariable{
         pw.println(String.format("外貨資格更新テスト初期表示BLogic動作確認1_No%dデータ準備終了",testNo));
         pw.println(String.format("外貨資格更新テスト初期表示BLogic動作確認1_No%d開始",testNo));
         pw.println("●結果");
-        String result = testInitBLogic.execute();
-        System.out.println(result);
-        if(result.equals("")) {
-            pw.println("''(ブランク)");
-        }else{
-            pw.println(result);
-        }
+        try {
+            String result = testInitBLogic.execute();
+            if(result.equals("")) {
+                pw.println("''(ブランク)");
+            }else{
+                ObjectMapper mapper = new ObjectMapper();
+                List<CIAFMUpdateAttendanceOutput> outputList;
+                    outputList = mapper.readValue(result, new TypeReference<List<CIAFMUpdateAttendanceOutput>>(){});
+                    int i = 1;
+                    for(CIAFMUpdateAttendanceOutput output : outputList) {
+                        pw.println(String.format("%d問目の出力問題リスト", i));
+                        pw.println(String.format(
+                                "問題ID:%s,問題文:%s,解説:%s,選択肢リスト:%s,正答リスト:%s",
+                                output.getQuestionId(),output.getQuestionSentence(),output.getQuestionExplanation(),output.getChoiceList(),output.getPassList()
+                        ));
+                        i++;
+                    }
+                }
+            }catch (IOException e){
+                e.printStackTrace();
+            } catch (Exception e) {
+                // TODO 自動生成された catch ブロック
+                System.out.print(e);
+                pw.println(e);
+            }
         pw.println(String.format("外貨資格更新テスト初期表示BLogic動作確認1_No%d終了",testNo));
         pw.println(String.format("外貨資格更新テスト初期表示BLogic動作確認1_No%dデータ戻し開始",testNo));
         periodData.updateFMPeriodDefault();
